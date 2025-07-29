@@ -170,7 +170,11 @@ function SignUPForm() {
               </div>
             </Form>
           </Card.Body>
+            <div className="d-flex justify-content-center"> 
+          <p >Don't have an Account? <span className="cursor-pointer text-info" >Signup</span></p>
+          </div>
         </Card>
+       
       </Container>
     </div>
   );

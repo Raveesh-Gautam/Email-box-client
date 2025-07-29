@@ -1,9 +1,10 @@
-import React from 'react'
-import SignUPForm from './components/Auth/SignUPForm'
+
+import Auth from './components/Auth/Auth'
 
 const App = () => {
   return (
-    <div><SignUPForm /></div>
+    <div><Auth />
+    </div>
   )
 }
 
