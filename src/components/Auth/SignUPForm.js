@@ -12,6 +12,7 @@ function SignUPForm() {
   const [emailValid, setEmailValid] = useState(null);
   const [passwordMatch, setPasswordMatch] = useState(null);
   const [apiError, setApiError] = useState("");
+ 
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -91,8 +92,7 @@ function SignUPForm() {
   };
 
   return (
-    <div className="bg-success">
-      <Container className="d-flex justify-content-center align-items-center vh-100">
+      <Container className="d-flex justify-content-center align-items-center ">
         <Card className="p-4 shadow-lg" style={{ width: "350px" }}>
           <Card.Body>
             <h3 className="text-center mb-4">Sign Up</h3>
@@ -170,13 +170,10 @@ function SignUPForm() {
               </div>
             </Form>
           </Card.Body>
-            <div className="d-flex justify-content-center"> 
-          <p >Don't have an Account? <span className="cursor-pointer text-info" >Signup</span></p>
-          </div>
+         
         </Card>
        
       </Container>
-    </div>
   );
 }
 
