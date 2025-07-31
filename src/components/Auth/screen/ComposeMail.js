@@ -1,5 +1,5 @@
 import axios from "axios";
-import { EditorState, convertToRaw } from "draft-js";
+import { EditorState } from "draft-js";
 import { useState } from "react";
 import { Button, Card, Container, Form } from "react-bootstrap";
 import { Editor } from "react-draft-wysiwyg";
@@ -11,38 +11,36 @@ const ComposeMail = () => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const handleSend = async () => {
-    if (!to || !subject || !editorState.getCurrentContent().hasText()) {
-      alert("All fields are required!");
-      return;
-    }
+  if (!to || !subject || !editorState.getCurrentContent().hasText()) {
+    alert("All fields are required!");
+    return;
+  }
 
-    // Convert editor content to raw JSON for storing
-    const messageContent = JSON.stringify(
-      convertToRaw(editorState.getCurrentContent())
-    );
+  // Split multiple emails by comma
+  const receiversArray = to.split(",").map((email) => email.trim());
 
-    const emailData = {
-      to,
-      subject,
-      message: messageContent, 
-      timestamp: new Date().toISOString(),
-    };
+  // Convert editor content to plain text (for email body)
+  const messageContent = editorState.getCurrentContent().getPlainText();
 
-    try {
-      await axios.post(
-        `https://email-box-22a5b-default-rtdb.firebaseio.com/email.json`,
-        emailData
-      );
-
-      alert("✅ Mail sent successfully!");
-      setTo("");
-      setSubject("");
-      setEditorState(EditorState.createEmpty());
-    } catch (err) {
-      console.error("Error sending mail:", err);
-      alert("❌ Failed to send mail.");
-    }
+  const emailData = {
+    subject,
+    message: messageContent,
+    senderEmail: "gautamraveesh07@gmail.com", // fixed sender
+    recievers: receiversArray
   };
+
+  try {
+    await axios.post(`http://localhost:8080/send`, emailData);
+    alert("✅ Mail sent successfully!");
+    setTo("");
+    setSubject("");
+    setEditorState(EditorState.createEmpty());
+  } catch (err) {
+    console.error("Error sending mail:", err);
+    alert("❌ Failed to send mail.");
+  }
+};
+
 
   return (
     <Container className="d-flex justify-content-center mt-5">
