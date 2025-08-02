@@ -102,3 +102,15 @@
   color: #888;
   padding: 20px;
 }
+.blue-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #007bff; 
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.unread {
+  background-color: #f0f7ff; 
+  font-weight: 600;
+}

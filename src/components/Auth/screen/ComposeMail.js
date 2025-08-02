@@ -1,8 +1,8 @@
 import axios from "axios";
 import { EditorState } from "draft-js";
-import { useState } from "react";
-import { Button, Card, Container, Form, InputGroup } from "react-bootstrap";
 import { MailIcon, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { Button, Card, Container, Form } from "react-bootstrap";
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import "./ComposeMail.css";
@@ -26,7 +26,7 @@ const ComposeMail = () => {
     const emailData = {
       subject,
       message: messageContent,
-      senderEmail: "", // fixed sender
+      senderEmail: "raveeshgautamfzd2002@gmail.com", // fixed sender
       recievers: receiversArray,
     };
 
