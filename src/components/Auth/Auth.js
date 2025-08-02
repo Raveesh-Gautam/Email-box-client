@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import LoginForm from "./LoginForm";
 import SignUPForm from "./SignUPForm";
 import Home from "./Pages/Home";
+import InboxView from "./Pages/InboxView";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(false); 
@@ -16,7 +17,7 @@ const Auth = () => {
   };
 
   if (isLogin) {
-    return <Home />;
+    return <InboxView/>;
   }
 
   return (

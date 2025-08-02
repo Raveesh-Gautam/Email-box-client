@@ -1,16 +1,11 @@
-
-import Auth from './components/Auth/Auth'
-import InboxView from './components/Auth/Pages/InboxView'
-import EmailScreen from './components/Auth/screen/ComposeMail'
+import Auth from "./components/Auth/Auth";
 
 const App = () => {
   return (
     <div>
-      {/* <Auth /> */}
-      <InboxView />
-    <EmailScreen/>
+      <Auth />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

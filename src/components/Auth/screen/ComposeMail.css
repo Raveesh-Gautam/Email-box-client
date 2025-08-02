@@ -1,0 +1,50 @@
+.compose-input {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding: 6px 10px;
+  background: white;
+  border-radius: 4px;
+}
+
+.compose-icon {
+  font-size: 18px;
+  margin-right: 8px;
+  color: #5f6368;
+}
+
+.compose-input-field {
+  border: none;
+  outline: none;
+  box-shadow: none;
+  flex: 1;
+  font-size: 14px;
+}
+
+.compose-input-field:focus {
+  border: none;
+  box-shadow: none;
+}
+.compose-message {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  min-height: 200px;
+  padding: 8px;
+  background: white;
+}
+
+.compose-wrapper {
+  border: none !important;
+  min-height: 180px;
+}
+
+.compose-editor {
+  min-height: 150px;
+  padding: 10px;
+}
+
+.compose-toolbar {
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}

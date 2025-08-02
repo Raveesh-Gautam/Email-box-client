@@ -10,6 +10,7 @@
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
     "draft-js": "^0.11.7",
+    "lucide-react": "^0.536.0",
     "quill": "^2.0.3",
     "react": "^19.1.1",
     "react-bootstrap": "^2.10.10",
@@ -30,15 +31,14 @@
       "react-app/jest"
     ]
   },
- "jest": {
-  "transformIgnorePatterns": [
-    "node_modules/(?!(axios)/)"
-  ],
-  "moduleNameMapper": {
-    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
-  }
-}
-,
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios)/)"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    }
+  },
   "browserslist": {
     "production": [
       ">0.2%",

@@ -1,9 +1,11 @@
 import axios from "axios";
 import { EditorState } from "draft-js";
 import { useState } from "react";
-import { Button, Card, Container, Form } from "react-bootstrap";
+import { Button, Card, Container, Form, InputGroup } from "react-bootstrap";
+import { MailIcon, MessageCircle } from "lucide-react";
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import "./ComposeMail.css";
 
 const ComposeMail = () => {
   const [to, setTo] = useState("");
@@ -11,74 +13,73 @@ const ComposeMail = () => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const handleSend = async () => {
-  if (!to || !subject || !editorState.getCurrentContent().hasText()) {
-    alert("All fields are required!");
-    return;
-  }
+    if (!to || !subject || !editorState.getCurrentContent().hasText()) {
+      alert("All fields are required!");
+      return;
+    }
 
-  // Split multiple emails by comma
-  const receiversArray = to.split(",").map((email) => email.trim());
+    const receiversArray = to.split(",").map((email) => email.trim());
 
-  // Convert editor content to plain text (for email body)
-  const messageContent = editorState.getCurrentContent().getPlainText();
+    // Convert editor content to plain text (for email body)
+    const messageContent = editorState.getCurrentContent().getPlainText();
 
-  const emailData = {
-    subject,
-    message: messageContent,
-    senderEmail: "gautamraveesh07@gmail.com", // fixed sender
-    recievers: receiversArray
+    const emailData = {
+      subject,
+      message: messageContent,
+      senderEmail: "", // fixed sender
+      recievers: receiversArray,
+    };
+
+    try {
+      await axios.post(`http://localhost:8080/send`, emailData);
+      alert("✅ Mail sent successfully!");
+      setTo("");
+      setSubject("");
+      setEditorState(EditorState.createEmpty());
+    } catch (err) {
+      console.error("Error sending mail:", err);
+      alert("❌ Failed to send mail.");
+    }
   };
 
-  try {
-    await axios.post(`http://localhost:8080/send`, emailData);
-    alert("✅ Mail sent successfully!");
-    setTo("");
-    setSubject("");
-    setEditorState(EditorState.createEmpty());
-  } catch (err) {
-    console.error("Error sending mail:", err);
-    alert("❌ Failed to send mail.");
-  }
-};
-
-
   return (
-    <Container className="d-flex justify-content-center mt-5">
-      <Card className="p-4 shadow-lg" style={{ width: "600px" }}>
-        <h3 className="text-center mb-3">Compose Mail</h3>
+    <Container className="d-flex  mt-1 ">
+      <Card className="p-4" style={{ width: "770px" }}>
         <Form>
-          <Form.Group className="mb-3">
-            <Form.Label>To</Form.Label>
+          <div className="compose-input mb-3">
+            <MailIcon className="compose-icon" />
             <Form.Control
               type="email"
               placeholder="Recipient's email"
               value={to}
               onChange={(e) => setTo(e.target.value)}
+              className="compose-input-field"
               required
             />
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Subject</Form.Label>
+          <div className="compose-input mb-3">
+            <MessageCircle className="compose-icon" />
             <Form.Control
               type="text"
               placeholder="Enter subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
+              className="compose-input-field"
               required
             />
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Message</Form.Label>
+          <div className="compose-message mb-3">
             <Editor
               editorState={editorState}
               onEditorStateChange={setEditorState}
-              toolbarClassName="toolbarClassName"
-              wrapperClassName="wrapperClassName"
-              editorClassName="editorClassName"
+              toolbarClassName="compose-toolbar"
+              wrapperClassName="compose-wrapper"
+              editorClassName="compose-editor"
+              placeholder="Write your message..."
             />
-          </Form.Group>
+          </div>
 
           <Button variant="primary" className="w-100" onClick={handleSend}>
             Send Mail
