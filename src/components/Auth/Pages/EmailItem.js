@@ -34,6 +34,20 @@ const EmailItem = () => {
   const handleCompose = () => {
     setShowCompose(true);
   };
+  const handleEmailDelete = async (id) => {
+    try {
+      const deleteResponse = await axios.delete(
+        `http://localhost:8080/${id}/delete`
+      );
+      console.log(deleteResponse.data);
+
+      setEmails((prevEmails) => prevEmails.filter((email) => email.id !== id));
+    } catch (err) {
+      console.log("Delete failed:", err.message);
+    }
+  };
+
+  console.log(emails);
 
   return (
     <div className="gmail-container d-flex">
@@ -119,6 +133,15 @@ const EmailItem = () => {
                       <span className="subject"> – {email.subject}</span>
                       <span className="message-preview">{email.message}</span>
                     </div>
+                    <div className="position-relative email-item ">
+                      <button
+                        className="btn btn-dark delete-btn position-absolute top-50 start-50 translate-middle w-100"
+                        onClick={() => handleEmailDelete(email.id)}
+                      >
+                        <Trash size={16} />
+                      </button>
+                    </div>
+
                     <div className="email-meta">
                       <span className="time">
                         {email.dayLabel} • {email.createdTime}
