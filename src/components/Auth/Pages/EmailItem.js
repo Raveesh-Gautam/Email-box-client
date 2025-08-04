@@ -1,4 +1,4 @@
-import axios from "axios";
+// src/components/EmailItem.jsx
 import {
   AlertCircle,
   Archive,
@@ -8,71 +8,26 @@ import {
   Star,
   Trash,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Badge, Button, Card, ListGroup } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
+import useEmails from "../../hooks/useEmails";
 import ComposeMail from "../screen/ComposeMail";
 import "./EmailItem.css";
 
 const EmailItem = () => {
-  const [emails, setEmails] = useState([]);
+  const {
+    emails,
+    loading,
+    unreadCount,
+    deleteEmail,
+    markAsSeen,
+  } = useEmails();
+
   const [showCompose, setShowCompose] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState(null);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const previousEmailIds = useRef(new Set());
 
-  // ✅ Fetch emails function
-  const fetchEmails = async () => {
-    const token = localStorage.getItem("firebaseToken");
-    try {
-      const response = await axios.get("http://localhost:8080/all", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const fetchedEmails = response.data;
-      const fetchedIds = new Set(fetchedEmails.map((mail) => mail.id));
-
-      // ✅ Only update state if there is new mail
-      const hasNewMail =
-        emails.length === 0 ||
-        fetchedEmails.length !== emails.length ||
-        [...fetchedIds].some((id) => !previousEmailIds.current.has(id));
-
-      if (hasNewMail) {
-        setEmails(fetchedEmails);
-        previousEmailIds.current = fetchedIds;
-        const count = fetchedEmails.filter((email) => !email.seen).length;
-        setUnreadCount(count);
-      }
-    } catch (error) {
-      console.error("Error fetching emails:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchEmails(); // initial load
-    const interval = setInterval(fetchEmails, 2000); 
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleCompose = () => setShowCompose(true);
-
-  const handleEmailDelete = async (id) => {
-    try {
-      const token = localStorage.getItem("firebaseToken");
-      await axios.delete(`http://localhost:8080/${id}/delete`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setEmails((prev) => prev.filter((email) => email.id !== id));
-      setUnreadCount((prev) => prev - 1);
-    } catch (err) {
-      console.log("Delete failed:", err.message);
-    }
-  };
+  if (loading) return <p className="text-center mt-5">Loading emails...</p>;
 
   return (
     <div className="gmail-container d-flex">
@@ -81,40 +36,26 @@ const EmailItem = () => {
         <Button
           variant="primary"
           className="compose-btn w-75 m-3"
-          onClick={handleCompose}
+          onClick={() => setShowCompose(true)}
         >
           Compose
         </Button>
         <ListGroup variant="flush" className="sidebar-list">
-          <ListGroup.Item
-            action
-            className="d-flex justify-content-between align-items-center"
-          >
+          <ListGroup.Item className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center gap-2">
               <Inbox size={16} /> Inbox
             </div>
             <span className="badge bg-primary rounded-pill">
-              unread {unreadCount}
+              Unread {unreadCount}
             </span>
           </ListGroup.Item>
-          <ListGroup.Item action>
-            <Star size={16} /> Starred
-          </ListGroup.Item>
-          <ListGroup.Item action>
-            <Send size={16} /> Sent
-          </ListGroup.Item>
-          <ListGroup.Item action>
-            <FileText size={16} /> Drafts
-          </ListGroup.Item>
-          <ListGroup.Item action>
-            <Archive size={16} /> Archive
-          </ListGroup.Item>
-          <ListGroup.Item action>
-            <AlertCircle size={16} /> Spam
-          </ListGroup.Item>
-          <ListGroup.Item action>
-            <Trash size={16} /> Trash
-          </ListGroup.Item>
+
+          <ListGroup.Item><Star size={16} /> Starred</ListGroup.Item>
+          <ListGroup.Item><Send size={16} /> Sent</ListGroup.Item>
+          <ListGroup.Item><FileText size={16} /> Drafts</ListGroup.Item>
+          <ListGroup.Item><Archive size={16} /> Archive</ListGroup.Item>
+          <ListGroup.Item><AlertCircle size={16} /> Spam</ListGroup.Item>
+          <ListGroup.Item><Trash size={16} /> Trash</ListGroup.Item>
         </ListGroup>
       </div>
 
@@ -130,21 +71,7 @@ const EmailItem = () => {
                     className="email-item d-flex justify-content-between align-items-center"
                     onClick={() => {
                       setSelectedEmail(email);
-                      setEmails((prev) =>
-                        prev.map((e) =>
-                          e.id === email.id ? { ...e, seen: true } : e
-                        )
-                      );
-                      const token = localStorage.getItem("firebaseToken");
-                      axios
-                        .put(`http://localhost:8080/${email.id}/seen`, null, {
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                          },
-                        })
-                        .catch((err) =>
-                          console.error("Error marking as seen:", err)
-                        );
+                      markAsSeen(email.id);
                     }}
                     style={{ cursor: "pointer" }}
                   >
@@ -162,14 +89,15 @@ const EmailItem = () => {
                     </div>
                     <div className="position-relative email-item ">
                       <button
-                        data-testid={`delete-btn-${email.id}`}
-                        className="btn btn-dark delete-btn position-absolute top-50 start-50 translate-middle w-100"
-                        onClick={() => handleEmailDelete(email.id)}
+                        className="btn btn-dark delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteEmail(email.id);
+                        }}
                       >
                         <Trash size={16} />
                       </button>
                     </div>
-
                     <div className="email-meta">
                       <span className="time">
                         {email.dayLabel} • {email.createdTime}
@@ -188,7 +116,6 @@ const EmailItem = () => {
             </ListGroup>
           </Card>
         ) : (
-          /* Full Email View */
           <Card className="shadow-sm p-4">
             <Button
               variant="link"
@@ -200,31 +127,20 @@ const EmailItem = () => {
             <h3 className="fw-semibold mb-3">{selectedEmail.subject}</h3>
             <div className="d-flex justify-content-between align-items-start mb-3">
               <div>
-                <p className="mb-1">
-                  <strong>From:</strong> {selectedEmail.senderEmail}
-                </p>
-                <p className="mb-1">
-                  <strong>To:</strong> {selectedEmail.recievers.join(", ")}
-                </p>
+                <p><strong>From:</strong> {selectedEmail.senderEmail}</p>
+                <p><strong>To:</strong> {selectedEmail.recievers.join(", ")}</p>
               </div>
               <span className="text-muted">
                 {selectedEmail.dayLabel} • {selectedEmail.createdTime}
               </span>
             </div>
             <hr />
-            <div
-              className="mt-3"
-              style={{ whiteSpace: "pre-line", lineHeight: "1.6" }}
-            >
+            <div className="mt-3" style={{ whiteSpace: "pre-line" }}>
               {selectedEmail.message}
             </div>
             <div className="mt-4 d-flex gap-2">
-              <Button variant="outline-primary" size="sm">
-                Reply
-              </Button>
-              <Button variant="outline-secondary" size="sm">
-                Forward
-              </Button>
+              <Button variant="outline-primary" size="sm">Reply</Button>
+              <Button variant="outline-secondary" size="sm">Forward</Button>
             </div>
           </Card>
         )}

@@ -1,16 +1,18 @@
-import axios from "axios";
 import { EditorState } from "draft-js";
 import { MailIcon, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { Button, Card, Container, Form } from "react-bootstrap";
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import useSendEmail from "../../hooks/useSendEmail";
 import "./ComposeMail.css";
 
 const ComposeMail = () => {
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+  const { sendEmail } = useSendEmail();
 
   const handleSend = async () => {
     if (!to || !subject || !editorState.getCurrentContent().hasText()) {
@@ -19,24 +21,17 @@ const ComposeMail = () => {
     }
 
     const receiversArray = to.split(",").map((email) => email.trim());
-
-    // Convert editor content to plain text (for email body)
     const messageContent = editorState.getCurrentContent().getPlainText();
 
     const emailData = {
       subject,
       message: messageContent,
-      senderEmail: "gautamraveesh07@gmail.com", // fixed sender
+      senderEmail: "gautamraveesh07@gmail.com",
       recievers: receiversArray,
     };
 
     try {
-   const token=   localStorage.getItem("firebaseToken")
-      await axios.post(`http://localhost:8080/send`, emailData,{
-  headers: {
-    Authorization: `Bearer ${token}`, 
-  },
-});
+      await sendEmail(emailData);
       alert("✅ Mail sent successfully!");
       setTo("");
       setSubject("");
@@ -48,9 +43,10 @@ const ComposeMail = () => {
   };
 
   return (
-    <Container className="d-flex  mt-1 ">
+    <Container className="d-flex mt-1">
       <Card className="p-4" style={{ width: "770px" }}>
         <Form>
+          {/* Recipient */}
           <div className="compose-input mb-3">
             <MailIcon className="compose-icon" />
             <Form.Control
@@ -63,6 +59,7 @@ const ComposeMail = () => {
             />
           </div>
 
+          {/* Subject */}
           <div className="compose-input mb-3">
             <MessageCircle className="compose-icon" />
             <Form.Control
@@ -75,6 +72,7 @@ const ComposeMail = () => {
             />
           </div>
 
+          {/* Message Editor */}
           <div className="compose-message mb-3">
             <Editor
               editorState={editorState}
