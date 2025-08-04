@@ -8,7 +8,7 @@ import {
   Star,
   Trash,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge, Button, Card, ListGroup } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import ComposeMail from "../screen/ComposeMail";
@@ -18,47 +18,61 @@ const EmailItem = () => {
   const [emails, setEmails] = useState([]);
   const [showCompose, setShowCompose] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState(null);
-  const [seen, setSeen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  useEffect(() => {
+  const previousEmailIds = useRef(new Set());
+
+  // ✅ Fetch emails function
+  const fetchEmails = async () => {
     const token = localStorage.getItem("firebaseToken");
-    axios
-      .get("http://localhost:8080/all", {
+    try {
+      const response = await axios.get("http://localhost:8080/all", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      .then((response) => {
-        setEmails(response.data);
-        const count = response.data.filter((email) => !email.seen).length;
+      });
+
+      const fetchedEmails = response.data;
+      const fetchedIds = new Set(fetchedEmails.map((mail) => mail.id));
+
+      // ✅ Only update state if there is new mail
+      const hasNewMail =
+        emails.length === 0 ||
+        fetchedEmails.length !== emails.length ||
+        [...fetchedIds].some((id) => !previousEmailIds.current.has(id));
+
+      if (hasNewMail) {
+        setEmails(fetchedEmails);
+        previousEmailIds.current = fetchedIds;
+        const count = fetchedEmails.filter((email) => !email.seen).length;
         setUnreadCount(count);
-      })
-      .catch((error) => console.error("Error fetching emails:", error));
+      }
+    } catch (error) {
+      console.error("Error fetching emails:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmails(); // initial load
+    const interval = setInterval(fetchEmails, 2000); 
+    return () => clearInterval(interval);
   }, []);
 
-  const handleCompose = () => {
-    setShowCompose(true);
-  };
+  const handleCompose = () => setShowCompose(true);
+
   const handleEmailDelete = async (id) => {
     try {
       const token = localStorage.getItem("firebaseToken");
-      const deleteResponse = await axios.delete(
-        `http://localhost:8080/${id}/delete`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(deleteResponse.data);
-
-      setEmails((prevEmails) => prevEmails.filter((email) => email.id !== id));
+      await axios.delete(`http://localhost:8080/${id}/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setEmails((prev) => prev.filter((email) => email.id !== id));
+      setUnreadCount((prev) => prev - 1);
     } catch (err) {
       console.log("Delete failed:", err.message);
     }
   };
-
-  console.log(emails);
 
   return (
     <div className="gmail-container d-flex">
@@ -80,11 +94,9 @@ const EmailItem = () => {
               <Inbox size={16} /> Inbox
             </div>
             <span className="badge bg-primary rounded-pill">
-              {" "}
               unread {unreadCount}
             </span>
           </ListGroup.Item>
-
           <ListGroup.Item action>
             <Star size={16} /> Starred
           </ListGroup.Item>
@@ -125,7 +137,7 @@ const EmailItem = () => {
                       );
                       const token = localStorage.getItem("firebaseToken");
                       axios
-                        .put(`http://localhost:8080/${email.id}/seen`, {
+                        .put(`http://localhost:8080/${email.id}/seen`, null, {
                           headers: {
                             Authorization: `Bearer ${token}`,
                           },
@@ -185,11 +197,7 @@ const EmailItem = () => {
             >
               ← Back to Inbox
             </Button>
-
-            {/* Subject */}
             <h3 className="fw-semibold mb-3">{selectedEmail.subject}</h3>
-
-            {/* Sender and receivers */}
             <div className="d-flex justify-content-between align-items-start mb-3">
               <div>
                 <p className="mb-1">
@@ -203,19 +211,13 @@ const EmailItem = () => {
                 {selectedEmail.dayLabel} • {selectedEmail.createdTime}
               </span>
             </div>
-
-            {/* Divider */}
             <hr />
-
-            {/* Message content */}
             <div
               className="mt-3"
               style={{ whiteSpace: "pre-line", lineHeight: "1.6" }}
             >
               {selectedEmail.message}
             </div>
-
-            {/* Action buttons (Reply, Forward) */}
             <div className="mt-4 d-flex gap-2">
               <Button variant="outline-primary" size="sm">
                 Reply
