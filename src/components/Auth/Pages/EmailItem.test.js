@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor,fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axios from "axios";
 import EmailItem from "./EmailItem";
@@ -22,3 +22,4 @@ test("opens compose modal on button click", async () => {
   await userEvent.click(button);
   expect(screen.getByText(/New Message/i)).toBeInTheDocument();
 });
+

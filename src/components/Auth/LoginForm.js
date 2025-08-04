@@ -45,6 +45,9 @@ const LoginForm = ({ onLoginStatus }) => {
       );
 
       console.log("✅ Login Success:", LoginData.data);
+      // After successful login
+localStorage.setItem("firebaseToken", LoginData.data.idToken);
+
       onLoginStatus(true);
       setForm({ email: "", password: "" });
       setApiError("Login Successful!");

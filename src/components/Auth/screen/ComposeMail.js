@@ -26,12 +26,17 @@ const ComposeMail = () => {
     const emailData = {
       subject,
       message: messageContent,
-      senderEmail: "raveeshgautamfzd2002@gmail.com", // fixed sender
+      senderEmail: "gautamraveesh07@gmail.com", // fixed sender
       recievers: receiversArray,
     };
 
     try {
-      await axios.post(`http://localhost:8080/send`, emailData);
+   const token=   localStorage.getItem("firebaseToken")
+      await axios.post(`http://localhost:8080/send`, emailData,{
+  headers: {
+    Authorization: `Bearer ${token}`, 
+  },
+});
       alert("✅ Mail sent successfully!");
       setTo("");
       setSubject("");

@@ -64,6 +64,8 @@ function SignUPForm() {
       );
 
       console.log("✅ Signup Success:", SignUpData.data);
+// After successful login
+localStorage.setItem("firebaseToken", SignUpData.data.idToken);
 
       // Clear inputs
       setEmail("");

@@ -21,8 +21,13 @@ const EmailItem = () => {
   const [seen, setSeen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   useEffect(() => {
+    const token = localStorage.getItem("firebaseToken");
     axios
-      .get("http://localhost:8080/all")
+      .get("http://localhost:8080/all", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
         setEmails(response.data);
         const count = response.data.filter((email) => !email.seen).length;
@@ -36,8 +41,14 @@ const EmailItem = () => {
   };
   const handleEmailDelete = async (id) => {
     try {
+      const token = localStorage.getItem("firebaseToken");
       const deleteResponse = await axios.delete(
-        `http://localhost:8080/${id}/delete`
+        `http://localhost:8080/${id}/delete`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       console.log(deleteResponse.data);
 
@@ -112,9 +123,13 @@ const EmailItem = () => {
                           e.id === email.id ? { ...e, seen: true } : e
                         )
                       );
-
+                      const token = localStorage.getItem("firebaseToken");
                       axios
-                        .put(`http://localhost:8080/${email.id}/seen`)
+                        .put(`http://localhost:8080/${email.id}/seen`, {
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                          },
+                        })
                         .catch((err) =>
                           console.error("Error marking as seen:", err)
                         );
@@ -135,6 +150,7 @@ const EmailItem = () => {
                     </div>
                     <div className="position-relative email-item ">
                       <button
+                        data-testid={`delete-btn-${email.id}`}
                         className="btn btn-dark delete-btn position-absolute top-50 start-50 translate-middle w-100"
                         onClick={() => handleEmailDelete(email.id)}
                       >
